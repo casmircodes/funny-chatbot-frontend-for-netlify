@@ -187,62 +187,70 @@
   </form>
 
   <script>
-    const chatBox = document.getElementById("chat-box");
-    const form = document.getElementById("chat-form");
-    const themeToggle = document.getElementById("theme-toggle");
-    let typingIndicator;
+  const chatBox = document.getElementById("chat-box");
+  const form = document.getElementById("chat-form");
+  const textarea = form.querySelector("textarea");
+  const themeToggle = document.getElementById("theme-toggle");
+  let typingIndicator;
 
-    // Handle theme toggle
-    themeToggle.addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-      const dark = document.body.classList.contains("dark");
-      themeToggle.textContent = dark ? "☀️" : "🌙";
-    });
+  // Theme toggle
+  themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+  });
 
-    function appendMessage(role, text, isMarkdown = false) {
-      const div = document.createElement("div");
-      div.className = "message " + role;
-      div.innerHTML = isMarkdown ? marked.parse(text) : text;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
+  function appendMessage(role, text, markdown = false) {
+    const div = document.createElement("div");
+    div.className = "message " + role;
+    div.innerHTML = markdown ? marked.parse(text) : text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function showTyping() {
+    typingIndicator = document.createElement("div");
+    typingIndicator.className = "typing";
+    typingIndicator.textContent = "Brandice AI is typing...";
+    chatBox.appendChild(typingIndicator);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function hideTyping() {
+    if (typingIndicator) {
+      chatBox.removeChild(typingIndicator);
+      typingIndicator = null;
     }
+  }
 
-    function showTypingIndicator() {
-      typingIndicator = document.createElement("div");
-      typingIndicator.className = "typing";
-      typingIndicator.textContent = "Brandice AI is typing...";
-      chatBox.appendChild(typingIndicator);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const userInput = textarea.value.trim();
+    if (!userInput) return;
 
-    function removeTypingIndicator() {
-      if (typingIndicator) {
-        chatBox.removeChild(typingIndicator);
-        typingIndicator = null;
-      }
-    }
+    appendMessage("user", userInput);
+    textarea.value = "";
+    showTyping();
 
-    form.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-      const userInput = formData.get("user_input");
-
-      appendMessage("user", userInput);
-      form.reset();
-
-      showTypingIndicator();
-
+    try {
       const res = await fetch("/chat", {
         method: "POST",
-        body: formData
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: userInput })
       });
 
       const data = await res.json();
-
-      removeTypingIndicator();
+      hideTyping();
       appendMessage("ai", data.reply, true);
-    });
-  </script>
+
+    } catch (err) {
+      hideTyping();
+      appendMessage("ai", "❌ Error: Could not reach server.");
+    }
+  });
+</script>
+
 </body>
 </html>
 
