@@ -157,6 +157,12 @@
       border-radius: 5px;
     }
 
+    #footer{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
     @media (max-width: 600px) {
       .message {
         max-width: 90%;
@@ -186,6 +192,9 @@
     <textarea name="user_input" placeholder="Type a message..." required></textarea>
     <button type="submit">Send</button>
   </form>
+  <div id="footer">
+    <p></p>cazmirtech@gmail.com</p>
+  </div>
 
   <script>
     const chatBox = document.getElementById("chat-box");
