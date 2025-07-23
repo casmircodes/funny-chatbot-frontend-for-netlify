@@ -1,4 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brandice AI Chatbot</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #f5f5f5;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background-color: #1a1a1a;
+      color: #eee;
+    }
+
+    #chat-box {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 14px;
+      margin: 8px 0;
+      border-radius: 18px;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    .user {
+      align-self: flex-end;
+      background-color: #0084ff;
+      color: white;
+      border-bottom-right-radius: 0;
+    }
+
+    .ai {
+      align-self: flex-start;
+      background-color: #e0e0e0;
+      color: #000;
+      border-bottom-left-radius: 0;
+    }
+
+    body.dark .ai {
+      background-color: #333;
+      color: #eee;
+    }
+
+    .typing {
+      font-style: italic;
+      font-size: 0.9em;
+      color: gray;
+      margin: 5px;
+    }
+
+    #chat-form {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      background: #fff;
+    }
+
+    body.dark #chat-form {
+      background: #111;
+      border-top: 1px solid #333;
+    }
+
+    #chat-form textarea {
+      flex-grow: 1;
+      resize: none;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 1em;
+      outline: none;
+    }
+
+    #chat-form button {
+      margin-left: 10px;
+      border: none;
+      padding: 0 20px;
+      border-radius: 20px;
+      background-color: #0084ff;
+      color: white;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    #theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.2em;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .message {
+        max-width: 95%;
+        font-size: 0.95em;
+      }
+
+      #chat-form textarea {
+        font-size: 0.95em;
+      }
+
+      #chat-form button {
+        padding: 0 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="theme-toggle">🌙</button>
+  <div id="chat-box"></div>
+
+  <form id="chat-form">
+    <textarea rows="1" placeholder="Type your message..." required></textarea>
+    <button type="submit">Send</button>
+  </form>
+
+  <!-- Add marked.js for markdown support -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const form = document.getElementById("chat-form");
+    const textarea = form.querySelector("textarea");
+    const themeToggle = document.getElementById("theme-toggle");
+    let typingIndicator;
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+    });
+
+    function appendMessage(role, text, markdown = false) {
+      const div = document.createElement("div");
+      div.className = "message " + role;
+      div.innerHTML = markdown ? marked.parse(text) : text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTyping() {
+      typingIndicator = document.createElement("div");
+      typingIndicator.className = "typing";
+      typingIndicator.textContent = "Brandice AI is typing...";
+      chatBox.appendChild(typingIndicator);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function hideTyping() {
+      if (typingIndicator) {
+        chatBox.removeChild(typingIndicator);
+        typingIndicator = null;
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userInput = textarea.value.trim();
+      if (!userInput) return;
+
+      appendMessage("user", userInput);
+      textarea.value = "";
+      showTyping();
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userInput })
+        });
+
+        const data = await res.json();
+        hideTyping();
+        appendMessage("ai", data.reply, true);
+
+      } catch (err) {
+        hideTyping();
+        appendMessage("ai", "❌ Error: Could not reach server.");
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
+
 <!-- Fromtend code after dark mode toogle code was added -->
+<!--
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -253,7 +461,7 @@
 
 </body>
 </html>
-
+-->
 
 
 
