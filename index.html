@@ -1,0 +1,451 @@
+<!-- Fromtend code after dark mode toogle code was added -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brandice Chatbot</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --text: #000;
+      --user-bg: #dcf8c6;
+      --bot-bg: #ffffff;
+      --input-bg: #ffffff;
+      --header-bg: #4a90e2;
+      --header-text: #ffffff;
+      --border: #ccc;
+    }
+
+    body.dark {
+      --bg: #121212;
+      --text: #eee;
+      --user-bg: #004d40;
+      --bot-bg: #1e1e1e;
+      --input-bg: #1c1c1c;
+      --header-bg: #263238;
+      --header-text: #ffffff;
+      --border: #444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    header {
+      background-color: var(--header-bg);
+      color: var(--header-text);
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+      position: relative;
+    }
+
+    #theme-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      background: none;
+      border: 1px solid var(--header-text);
+      color: var(--header-text);
+      padding: 5px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 0.75rem 1rem;
+      border-radius: 20px;
+      line-height: 1.4;
+      font-size: 1rem;
+      word-wrap: break-word;
+    }
+
+    .user {
+      align-self: flex-end;
+      background-color: var(--user-bg);
+      border-bottom-right-radius: 0;
+    }
+
+    .ai {
+      align-self: flex-start;
+      background-color: var(--bot-bg);
+      border-bottom-left-radius: 0;
+      border: 1px solid var(--border);
+    }
+
+    .typing {
+      align-self: flex-start;
+      font-style: italic;
+      color: #888;
+      padding: 0.5rem 1rem;
+      background-color: #eee;
+      border-radius: 15px;
+    }
+
+    form {
+      display: flex;
+      padding: 0.75rem;
+      background-color: var(--input-bg);
+      border-top: 1px solid var(--border);
+    }
+
+    textarea {
+      flex: 1;
+      resize: none;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      font-size: 1rem;
+      margin-right: 0.5rem;
+      height: 3rem;
+      background-color: var(--input-bg);
+      color: var(--text);
+    }
+
+    button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      padding: 0 1rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #357ab8;
+    }
+
+    pre {
+      background: #272822;
+      color: #f8f8f2;
+      padding: 10px;
+      overflow-x: auto;
+      border-radius: 10px;
+    }
+
+    code {
+      font-family: monospace;
+      background: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 600px) {
+      .message {
+        max-width: 90%;
+        font-size: 0.95rem;
+      }
+
+      textarea {
+        font-size: 0.95rem;
+      }
+
+      button {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    💬 Brandice AI
+    <button id="theme-toggle">🌙</button>
+  </header>
+
+  <div id="chat-box"></div>
+
+  <form id="chat-form">
+    <textarea name="user_input" placeholder="Type a message..." required></textarea>
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const form = document.getElementById("chat-form");
+    const themeToggle = document.getElementById("theme-toggle");
+    let typingIndicator;
+
+    // Handle theme toggle
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const dark = document.body.classList.contains("dark");
+      themeToggle.textContent = dark ? "☀️" : "🌙";
+    });
+
+    function appendMessage(role, text, isMarkdown = false) {
+      const div = document.createElement("div");
+      div.className = "message " + role;
+      div.innerHTML = isMarkdown ? marked.parse(text) : text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      typingIndicator = document.createElement("div");
+      typingIndicator.className = "typing";
+      typingIndicator.textContent = "Brandice AI is typing...";
+      chatBox.appendChild(typingIndicator);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      if (typingIndicator) {
+        chatBox.removeChild(typingIndicator);
+        typingIndicator = null;
+      }
+    }
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const userInput = formData.get("user_input");
+
+      appendMessage("user", userInput);
+      form.reset();
+
+      showTypingIndicator();
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      removeTypingIndicator();
+      appendMessage("ai", data.reply, true);
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+<!-- Frontend code before the code for dark mode toogle was added -->
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brandice Chatbot</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: #4a90e2;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+    }
+
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 0.75rem 1rem;
+      border-radius: 20px;
+      line-height: 1.4;
+      font-size: 1rem;
+      word-wrap: break-word;
+    }
+
+    .user {
+      align-self: flex-end;
+      background-color: #dcf8c6;
+      border-bottom-right-radius: 0;
+    }
+
+    .ai {
+      align-self: flex-start;
+      background-color: #ffffff;
+      border-bottom-left-radius: 0;
+      border: 1px solid #ddd;
+    }
+
+    .typing {
+      align-self: flex-start;
+      font-style: italic;
+      color: #666;
+      padding: 0.5rem 1rem;
+      background-color: #eee;
+      border-radius: 15px;
+    }
+
+    form {
+      display: flex;
+      padding: 0.75rem;
+      background-color: #fff;
+      border-top: 1px solid #ccc;
+    }
+
+    textarea {
+      flex: 1;
+      resize: none;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 15px;
+      font-size: 1rem;
+      margin-right: 0.5rem;
+      height: 3rem;
+      overflow-y: auto;
+    }
+
+    button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      padding: 0 1rem;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #357ab8;
+    }
+
+    pre {
+      background: #272822;
+      color: #f8f8f2;
+      padding: 10px;
+      overflow-x: auto;
+      border-radius: 10px;
+    }
+
+    code {
+      font-family: monospace;
+      background: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 600px) {
+      .message {
+        max-width: 90%;
+        font-size: 0.95rem;
+      }
+
+      textarea {
+        font-size: 0.95rem;
+      }
+
+      button {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>💬 Brandice AI</header>
+
+  <div id="chat-box"></div>
+
+  <form id="chat-form">
+    <textarea name="user_input" placeholder="Type a message..." required></textarea>
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const form = document.getElementById("chat-form");
+    let typingIndicator;
+
+    function appendMessage(role, text, isMarkdown = false) {
+      const div = document.createElement("div");
+      div.className = "message " + role;
+      div.innerHTML = isMarkdown ? marked.parse(text) : text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      typingIndicator = document.createElement("div");
+      typingIndicator.className = "typing";
+      typingIndicator.textContent = "Brandice AI is typing...";
+      chatBox.appendChild(typingIndicator);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      if (typingIndicator) {
+        chatBox.removeChild(typingIndicator);
+        typingIndicator = null;
+      }
+    }
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const userInput = formData.get("user_input");
+
+      appendMessage("user", userInput);
+      form.reset();
+
+      showTypingIndicator();
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      removeTypingIndicator();
+      appendMessage("ai", data.reply, true);
+    });
+  </script>
+</body>
+</html>
+-->
