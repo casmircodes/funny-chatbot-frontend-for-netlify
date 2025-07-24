@@ -43,6 +43,8 @@
       flex-direction: column;
       height: 100vh;
       transition: background 0.3s, color 0.3s;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     header {
@@ -52,8 +54,6 @@
       padding: 1rem;
       font-size: 1.5rem;
       position: relative;
-      padding-top: env(safe-area-inset-top);
-      z-index: 999;
     }
 
     #theme-toggle {
