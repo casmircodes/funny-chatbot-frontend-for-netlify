@@ -7,28 +7,8 @@
   <title>Brandice AI</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow-x: hidden;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      height: 100dvh; /* Mobile browser viewport fix */
-      transition: background 0.3s, color 0.3s;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
     :root {
+      --vh: 1vh;
       --bg: #f5f5f5;
       --text: #000;
       --user-bg: #dcf8c6;
@@ -50,10 +30,27 @@
       --border: #444;
     }
 
-    * {
-      box-sizing: border-box;
+    html, body {
       margin: 0;
       padding: 0;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: calc(var(--vh, 1vh) * 100);
+      transition: background 0.3s, color 0.3s;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     header {
@@ -63,6 +60,7 @@
       padding: 1rem;
       font-size: 1.5rem;
       position: relative;
+      flex-shrink: 0;
     }
 
     #theme-toggle {
@@ -174,10 +172,6 @@
       border-radius: 5px;
     }
 
-    #footer {
-      /* placeholder footer if needed later */
-    }
-
     @media (max-width: 600px) {
       .message {
         max-width: 90%;
@@ -192,7 +186,6 @@
         font-size: 0.95rem;
       }
     }
-
   </style>
 </head>
 <body>
@@ -209,6 +202,14 @@
   </form>
 
   <script>
+    // 👉 Fix mobile viewport height issue
+    function setViewportHeight() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    setViewportHeight();
+    window.addEventListener('resize', setViewportHeight);
+
     const chatBox = document.getElementById("chat-box");
     const form = document.getElementById("chat-form");
     const themeToggle = document.getElementById("theme-toggle");
@@ -216,7 +217,7 @@
     let typingIndicator;
     let chatHistory = [];
 
-    // Theme toggle
+    // 🌗 Theme toggle
     themeToggle.addEventListener("click", () => {
       document.body.classList.toggle("dark");
       themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
@@ -278,6 +279,7 @@
   </script>
 </body>
 </html>
+
 
 
 
