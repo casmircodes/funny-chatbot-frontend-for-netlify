@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -312,6 +313,14 @@
         appendMessage("ai", "Server is busy. Please try again later.");
       }
     });
+
+    // Wake up the backend as soon as the page loads
+window.addEventListener("DOMContentLoaded", () => {
+  fetch(`${backendURL}/wake`, { method: "GET" })
+    .then(() => console.log("Backend wake-up request sent."))
+    .catch(err => console.warn("Wake-up failed:", err));
+});
+
   </script>
 </body>
 </html>
