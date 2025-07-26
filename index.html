@@ -316,7 +316,7 @@
 
     // Wake up the backend as soon as the page loads
 window.addEventListener("DOMContentLoaded", () => {
-  fetch(`${backendURL}/wake`, { method: "GET" })
+  fetch(`https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/wake`, { method: "GET" })
     .then(() => console.log("Backend wake-up request sent."))
     .catch(err => console.warn("Wake-up failed:", err));
 });
