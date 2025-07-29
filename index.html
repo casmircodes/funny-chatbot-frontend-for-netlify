@@ -224,6 +224,12 @@
     @keyframes fadeOut {
       to { opacity: 0; visibility: hidden; }
     }
+    @media(max-width: 650px){
+      #splash-spinner {
+      display: block;
+    }
+
+          }
   </style>
 </head>
 <body>
@@ -347,7 +353,7 @@
       } finally {
         setTimeout(() => {
           document.getElementById("splash-screen").style.display = "none";
-        }, 13500);
+        }, 60000);
       }
     }
 
