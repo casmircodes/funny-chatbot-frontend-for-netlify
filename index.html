@@ -189,21 +189,6 @@
     }
   </style>
 </head>
-Here's the **modified code** that shows a **fancy animated splash screen** with a wake-up message while the server wakes up for the first time. Once ready, it fades into the chat UI:
-
-### ✅ Changes:
-
-* Added a full-screen splash screen with spinner.
-* Wake request is triggered on first visit (`DOMContentLoaded`).
-* Splash screen hides once backend responds with `{ status: "ready" }`.
-
----
-
-### ✅ Modified Code (only `<body>` and `<script>` sections changed):
-
-Replace your `<body>` and `<script>` section with this:
-
-```html
 <body>
   <div id="splash-screen">
     <div class="spinner"></div>
@@ -368,15 +353,6 @@ Replace your `<body>` and `<script>` section with this:
     });
   </script>
 </body>
-```
-
----
-
-Let me know if you want:
-
-* A logo or animation on splash,
-* Custom message based on time ("Good morning" etc),
-* Or audio feedback on wake.
 
 </html>
 
