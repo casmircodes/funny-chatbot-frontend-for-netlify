@@ -1,6 +1,193 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Zirra AI</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* ... [existing styles unchanged] ... */
+
+    #splash-screen {
+      position: fixed;
+      z-index: 9999;
+      background: var(--bg);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s ease;
+    }
+
+    #splash-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .spinner {
+      border: 4px solid #ccc;
+      border-top: 4px solid #4a90e2;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .splash-text {
+      font-size: 1.2rem;
+      color: var(--text);
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="splash-screen">
+    <div class="spinner"></div>
+    <div class="splash-text">Waking server, please wait...</div>
+  </div>
+
+  <header>
+    💬 Zirra AI
+    <button id="theme-toggle">🌙</button>
+  </header>
+
+  <div id="chat-box"></div>
+
+  <form id="chat-form">
+    <textarea name="user_input" placeholder="Type a message..." required></textarea>
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    function setViewportHeight() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    setViewportHeight();
+    window.addEventListener('resize', setViewportHeight);
+
+    const chatBox = document.getElementById("chat-box");
+    const form = document.getElementById("chat-form");
+    const themeToggle = document.getElementById("theme-toggle");
+    const textarea = form.querySelector("textarea");
+    const splashScreen = document.getElementById("splash-screen");
+    let typingIndicator;
+    let chatHistory = [];
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+    });
+
+    function appendMessage(role, text, isMarkdown = false) {
+      const div = document.createElement("div");
+      div.className = "message " + role;
+      div.innerHTML = isMarkdown ? marked.parse(text) : text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      typingIndicator = document.createElement("div");
+      typingIndicator.className = "typing";
+      typingIndicator.textContent = "Zirra is typing...";
+      chatBox.appendChild(typingIndicator);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      if (typingIndicator) {
+        chatBox.removeChild(typingIndicator);
+        typingIndicator = null;
+      }
+    }
+
+    async function waitUntilReady() {
+      const maxRetries = 10;
+      const delayMs = 3000;
+
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          const res = await fetch("https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/waiting");
+          const data = await res.json();
+          if (data.status === "ready") return true;
+        } catch {}
+        await new Promise(r => setTimeout(r, delayMs));
+      }
+      return false;
+    }
+
+    async function sendChat(userInput) {
+      showTypingIndicator();
+      try {
+        const res = await fetch("https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_input: userInput, history: chatHistory })
+        });
+
+        const data = await res.json();
+        removeTypingIndicator();
+
+        if (res.status === 429) {
+          appendMessage("ai", "Server is busy. Please try again later.");
+          return;
+        }
+
+        appendMessage("ai", data.reply, true);
+        chatHistory = data.history;
+      } catch (err) {
+        removeTypingIndicator();
+        appendMessage("ai", "Oops! Something went wrong.");
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userInput = textarea.value.trim();
+      if (!userInput) return;
+
+      appendMessage("user", userInput);
+      textarea.value = "";
+
+      const ready = await waitUntilReady();
+      if (ready) {
+        await sendChat(userInput);
+      } else {
+        appendMessage("ai", "Server is busy. Please try again later.");
+      }
+    });
+
+    // 🟡 Wake server on initial load
+    window.addEventListener("DOMContentLoaded", async () => {
+      const ready = await waitUntilReady();
+
+      splashScreen.classList.add("fade-out");
+
+      setTimeout(() => {
+        splashScreen.style.display = "none";
+      }, 500); // allow fade-out animation to complete
+    });
+  </script>
+</body>
+</html>
 
 
+
+
+
+<!--
 
 <!DOCTYPE html>
 <html lang="en">
@@ -320,7 +507,7 @@
   </script>
 </body>
 </html>
-
+-->
 
 
 
