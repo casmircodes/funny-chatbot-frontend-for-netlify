@@ -157,25 +157,63 @@
       background-color: #357ab8;
     }
 
-    /* Splash screen styles */
+    /* 💫 Splash Screen Styles */
     #splash-screen {
       position: fixed;
       top: 0; left: 0;
-      width: 100vw; height: 100vh;
+      width: 100vw;
+      height: 100vh;
       background: linear-gradient(135deg, #4a90e2, #357ab8);
-      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
-      font-weight: bold;
       z-index: 9999;
-      animation: fadein 2s ease-in-out infinite alternate;
+      flex-direction: column;
+      animation: splashFadeIn 1s ease-in-out forwards;
     }
 
-    @keyframes fadein {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0.8; transform: scale(1.05); }
+    .loader {
+      text-align: center;
+      animation: popIn 1.2s ease-out;
+    }
+
+    .ring {
+      width: 70px;
+      height: 70px;
+      border: 6px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      background: linear-gradient(to right, #fff, #e0e0e0, #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200% auto;
+      animation: shimmer 2s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes splashFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     @media (max-width: 600px) {
@@ -195,7 +233,13 @@
   </style>
 </head>
 <body style="display:none;">
-  <div id="splash-screen">⚡ Waking up Zirra AI...</div>
+  <!-- 🌀 Splash Screen -->
+  <div id="splash-screen">
+    <div class="loader">
+      <div class="ring"></div>
+      <div class="logo">✨ Zirra AI is warming up...</div>
+    </div>
+  </div>
 
   <header>
     💬 Zirra AI
@@ -210,7 +254,6 @@
   </form>
 
   <script>
-    // Set viewport
     function setViewportHeight() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -257,7 +300,6 @@
     async function waitUntilReady() {
       const maxRetries = 10;
       const delayMs = 3000;
-
       for (let i = 0; i < maxRetries; i++) {
         try {
           const res = await fetch("https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/waiting");
@@ -306,13 +348,11 @@
       }
     });
 
-    // Wake up backend and show splash for at least 20 seconds
+    // 🛠 Wake up backend and show splash
     window.addEventListener("DOMContentLoaded", async () => {
       const wakeUrl = "https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/waiting";
-
       const splashDelay = new Promise(res => setTimeout(res, 20000));
-      const wakeRequest = fetch(wakeUrl).catch(() => {}); // don't block if it fails
-
+      const wakeRequest = fetch(wakeUrl).catch(() => {});
       await Promise.all([splashDelay, wakeRequest]);
 
       splash.remove();
