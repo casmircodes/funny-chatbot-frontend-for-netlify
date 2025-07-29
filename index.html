@@ -1,6 +1,4 @@
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,19 +157,25 @@
       background-color: #357ab8;
     }
 
-    pre {
-      background: #272822;
-      color: #f8f8f2;
-      padding: 10px;
-      overflow-x: auto;
-      border-radius: 10px;
+    /* Splash screen styles */
+    #splash-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: linear-gradient(135deg, #4a90e2, #357ab8);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      z-index: 9999;
+      animation: fadein 2s ease-in-out infinite alternate;
     }
 
-    code {
-      font-family: monospace;
-      background: #f0f0f0;
-      padding: 2px 4px;
-      border-radius: 5px;
+    @keyframes fadein {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0.8; transform: scale(1.05); }
     }
 
     @media (max-width: 600px) {
@@ -188,56 +192,10 @@
         font-size: 0.95rem;
       }
     }
-
-    /* 🔥 Splash Screen Styles */
-    #splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, #4a90e2, #50e3c2);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2rem;
-      z-index: 9999;
-      animation: fadeOut 1s ease forwards;
-      animation-delay: 3s;
-    }
-
-    #splash-spinner {
-      border: 6px solid rgba(255, 255, 255, 0.3);
-      border-top: 6px solid white;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin-right: 1rem;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes fadeOut {
-      to { opacity: 0; visibility: hidden; }
-    }
-    @media(max-width: 650px){
-      #splash-spinner {
-      display: block;
-    }
-
-          }
   </style>
 </head>
-<body>
-  <!-- 🚀 Splash screen -->
-  <div id="splash-screen">
-    <div id="splash-spinner"></div>
-    <span>Initializing Zirra AI, please wait...</span>
-  </div>
+<body style="display:none;">
+  <div id="splash-screen">⚡ Waking up Zirra AI...</div>
 
   <header>
     💬 Zirra AI
@@ -252,6 +210,7 @@
   </form>
 
   <script>
+    // Set viewport
     function setViewportHeight() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -263,6 +222,7 @@
     const form = document.getElementById("chat-form");
     const themeToggle = document.getElementById("theme-toggle");
     const textarea = form.querySelector("textarea");
+    const splash = document.getElementById("splash-screen");
     let typingIndicator;
     let chatHistory = [];
 
@@ -297,6 +257,7 @@
     async function waitUntilReady() {
       const maxRetries = 10;
       const delayMs = 3000;
+
       for (let i = 0; i < maxRetries; i++) {
         try {
           const res = await fetch("https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/waiting");
@@ -316,6 +277,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_input: userInput, history: chatHistory })
         });
+
         const data = await res.json();
         removeTypingIndicator();
         if (res.status === 429) {
@@ -326,7 +288,7 @@
         chatHistory = data.history;
       } catch {
         removeTypingIndicator();
-        appendMessage("ai", "Oops! Something went wrong.", false);
+        appendMessage("ai", "Oops! Something went wrong.");
       }
     }
 
@@ -344,23 +306,22 @@
       }
     });
 
-    // 🛌 Wake backend on load
-    async function wakeServer() {
-      try {
-        await fetch("https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/wake");
-      } catch (e) {
-        console.warn("Wakeup failed", e);
-      } finally {
-        setTimeout(() => {
-          document.getElementById("splash-screen").style.display = "none";
-        }, 60000);
-      }
-    }
+    // Wake up backend and show splash for at least 20 seconds
+    window.addEventListener("DOMContentLoaded", async () => {
+      const wakeUrl = "https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/waiting";
 
-    window.addEventListener("DOMContentLoaded", wakeServer);
+      const splashDelay = new Promise(res => setTimeout(res, 20000));
+      const wakeRequest = fetch(wakeUrl).catch(() => {}); // don't block if it fails
+
+      await Promise.all([splashDelay, wakeRequest]);
+
+      splash.remove();
+      document.body.style.display = "flex";
+    });
   </script>
 </body>
 </html>
+
 
 
 
