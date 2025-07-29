@@ -7,6 +7,7 @@
   <title>Zirra AI</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
+    /* Existing CSS... */
     :root {
       --vh: 1vh;
       --bg: #f5f5f5;
@@ -157,63 +158,19 @@
       background-color: #357ab8;
     }
 
-    /* 💫 Splash Screen Styles */
-    #splash-screen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: linear-gradient(135deg, #4a90e2, #357ab8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      flex-direction: column;
-      animation: splashFadeIn 1s ease-in-out forwards;
+    pre {
+      background: #272822;
+      color: #f8f8f2;
+      padding: 10px;
+      overflow-x: auto;
+      border-radius: 10px;
     }
 
-    .loader {
-      text-align: center;
-      animation: popIn 1.2s ease-out;
-    }
-
-    .ring {
-      width: 70px;
-      height: 70px;
-      border: 6px solid rgba(255, 255, 255, 0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
-    }
-
-    .logo {
-      font-size: 1.8rem;
-      font-weight: bold;
-      background: linear-gradient(to right, #fff, #e0e0e0, #fff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-size: 200% auto;
-      animation: shimmer 2s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes shimmer {
-      0% { background-position: 200% center; }
-      100% { background-position: -200% center; }
-    }
-
-    @keyframes popIn {
-      0% { transform: scale(0.7); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    @keyframes splashFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    code {
+      font-family: monospace;
+      background: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 5px;
     }
 
     @media (max-width: 600px) {
@@ -230,30 +187,81 @@
         font-size: 0.95rem;
       }
     }
+
+    /* 🌀 Splash screen styles */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #4a90e2, #81d4fa);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      z-index: 9999;
+      flex-direction: column;
+      animation: fadeOut 1s ease-out 19s forwards;
+    }
+
+    .spinner {
+      border: 6px solid rgba(255, 255, 255, 0.3);
+      border-top: 6px solid white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      margin-top: 20px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
-<body style="display:none;">
-  <!-- 🌀 Splash Screen -->
-  <div id="splash-screen">
-    <div class="loader">
-      <div class="ring"></div>
-      <div class="logo">✨ Zirra AI is warming up...</div>
-    </div>
+<body>
+  <!-- 🌀 Splash screen -->
+  <div id="splash">
+    <div>Zirra AI is warming up...</div>
+    <div class="spinner"></div>
   </div>
 
-  <header>
+  <!-- Main app (initially hidden) -->
+  <header class="hidden">
     💬 Zirra AI
     <button id="theme-toggle">🌙</button>
   </header>
 
-  <div id="chat-box"></div>
+  <div id="chat-box" class="hidden"></div>
 
-  <form id="chat-form">
+  <form id="chat-form" class="hidden">
     <textarea name="user_input" placeholder="Type a message..." required></textarea>
     <button type="submit">Send</button>
   </form>
 
   <script>
+    // 👋 Wake up the server
+    fetch("https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/wake").catch(() => {});
+
+    // ⏳ Wait 20 seconds, then hide splash and show app
+    window.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        document.getElementById("splash").classList.add("hidden");
+        document.querySelector("header").classList.remove("hidden");
+        document.getElementById("chat-box").classList.remove("hidden");
+        document.getElementById("chat-form").classList.remove("hidden");
+      }, 20000);
+    });
+
+    // 👇 All your existing JS (theme toggle, chat logic, etc.)
     function setViewportHeight() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -265,7 +273,6 @@
     const form = document.getElementById("chat-form");
     const themeToggle = document.getElementById("theme-toggle");
     const textarea = form.querySelector("textarea");
-    const splash = document.getElementById("splash-screen");
     let typingIndicator;
     let chatHistory = [];
 
@@ -322,13 +329,15 @@
 
         const data = await res.json();
         removeTypingIndicator();
+
         if (res.status === 429) {
           appendMessage("ai", "Server is busy. Please try again later.");
           return;
         }
+
         appendMessage("ai", data.reply, true);
         chatHistory = data.history;
-      } catch {
+      } catch (err) {
         removeTypingIndicator();
         appendMessage("ai", "Oops! Something went wrong.");
       }
@@ -338,25 +347,13 @@
       e.preventDefault();
       const userInput = textarea.value.trim();
       if (!userInput) return;
+
       appendMessage("user", userInput);
       textarea.value = "";
+
       const ready = await waitUntilReady();
-      if (ready) {
-        await sendChat(userInput);
-      } else {
-        appendMessage("ai", "Server is busy. Please try again later.");
-      }
-    });
-
-    // 🛠 Wake up backend and show splash
-    window.addEventListener("DOMContentLoaded", async () => {
-      const wakeUrl = "https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/waiting";
-      const splashDelay = new Promise(res => setTimeout(res, 20000));
-      const wakeRequest = fetch(wakeUrl).catch(() => {});
-      await Promise.all([splashDelay, wakeRequest]);
-
-      splash.remove();
-      document.body.style.display = "flex";
+      if (ready) await sendChat(userInput);
+      else appendMessage("ai", "Server is busy. Please try again later.");
     });
   </script>
 </body>
