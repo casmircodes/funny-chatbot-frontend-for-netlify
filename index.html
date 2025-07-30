@@ -351,7 +351,11 @@
       appendMessage("user", userInput);
       textarea.value = "";
 
-      showTypingIndicator();
+      
+      setTimeout(() => {
+        // This code will run after 3000 milliseconds (3 seconds)
+        showTypingIndicator();
+      }, 2000);
 
       const ready = await waitUntilReady();
       if (ready) await sendChat(userInput);
