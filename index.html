@@ -319,7 +319,7 @@
     }
 
     async function sendChat(userInput) {
-      showTypingIndicator();
+      //showTypingIndicator();
       try {
         const res = await fetch("https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/chat", {
           method: "POST",
@@ -350,6 +350,8 @@
 
       appendMessage("user", userInput);
       textarea.value = "";
+
+      showTypingIndicator();
 
       const ready = await waitUntilReady();
       if (ready) await sendChat(userInput);
