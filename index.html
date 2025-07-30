@@ -359,7 +359,7 @@
 
       const ready = await waitUntilReady();
       if (ready) await sendChat(userInput);
-      else appendMessage("ai", "Server is busy. Please try again later.");
+      else removeTypingIndicator(); appendMessage("ai", "Server is busy. Please try again later.");
     });
   </script>
 </body>
