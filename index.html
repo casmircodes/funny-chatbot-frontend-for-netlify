@@ -253,7 +253,9 @@
 
     // ⏳ Wait 20 seconds, then hide splash and show app
     window.addEventListener("DOMContentLoaded", () => {
-      fetch("https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/wake").catch(() => {});
+      fetch("https://kwsdjcsmdsdhsfsdksaddkizsd.onrender.com/wake", { method: "GET" })
+    .then(() => console.log("Backend wake-up request sent."))
+    .catch(err => console.warn("Wake-up failed:", err));
       setTimeout(() => {
         document.getElementById("splash").classList.add("hidden");
         document.querySelector("header").classList.remove("hidden");
