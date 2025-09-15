@@ -26,7 +26,7 @@
 
     .card {
       background: white;
-      padding: 20px;
+      padding: 15px;
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       text-align: center;
@@ -40,13 +40,11 @@
 
     .card img {
       width: 100%;
-      height: 150px;
-      object-fit: cover;
       border-radius: 10px;
+      margin-bottom: 10px;
     }
 
     .card-title {
-      margin-top: 10px;
       font-weight: bold;
       font-size: 1.1rem;
     }
@@ -182,29 +180,29 @@
 
   <!-- 🔹 HOME PAGE -->
   <div id="home">
-    <div class="card" data-name="Rex AI" data-url="https://brandice.xyz">
-      <img src="https://via.placeholder.com/200x150" alt="Bot 1">
+    <div class="card" data-bot="rex">
+      <img src="https://via.placeholder.com/200" alt="Rex AI">
       <div class="card-title">Rex AI</div>
     </div>
-    <div class="card" data-name="Luna Bot" data-url="https://luna-backend.com">
-      <img src="https://via.placeholder.com/200x150" alt="Bot 2">
-      <div class="card-title">Luna Bot</div>
+    <div class="card" data-bot="luna">
+      <img src="https://via.placeholder.com/200" alt="Luna AI">
+      <div class="card-title">Luna AI</div>
     </div>
-    <div class="card" data-name="Nova Chat" data-url="https://nova-backend.com">
-      <img src="https://via.placeholder.com/200x150" alt="Bot 3">
-      <div class="card-title">Nova Chat</div>
+    <div class="card" data-bot="neo">
+      <img src="https://via.placeholder.com/200" alt="Neo AI">
+      <div class="card-title">Neo AI</div>
     </div>
-    <div class="card" data-name="Orion AI" data-url="https://orion-backend.com">
-      <img src="https://via.placeholder.com/200x150" alt="Bot 4">
-      <div class="card-title">Orion AI</div>
+    <div class="card" data-bot="ava">
+      <img src="https://via.placeholder.com/200" alt="Ava AI">
+      <div class="card-title">Ava AI</div>
     </div>
-    <div class="card" data-name="Zara Bot" data-url="https://zara-backend.com">
-      <img src="https://via.placeholder.com/200x150" alt="Bot 5">
-      <div class="card-title">Zara Bot</div>
+    <div class="card" data-bot="max">
+      <img src="https://via.placeholder.com/200" alt="Max AI">
+      <div class="card-title">Max AI</div>
     </div>
-    <div class="card" data-name="Kai Assistant" data-url="https://kai-backend.com">
-      <img src="https://via.placeholder.com/200x150" alt="Bot 6">
-      <div class="card-title">Kai Assistant</div>
+    <div class="card" data-bot="zara">
+      <img src="https://via.placeholder.com/200" alt="Zara AI">
+      <div class="card-title">Zara AI</div>
     </div>
   </div>
 
@@ -212,12 +210,12 @@
   <div id="chat-section">
     <!-- Splash only for chatbot -->
     <div id="splash">
-      <div>Loading chatbot...</div>
+      <div>AI is warming up...</div>
       <div class="spinner"></div>
     </div>
 
     <header>
-      <span id="bot-name">💬 Rex AI</span>
+      <span id="chatbot-name">💬 AI</span>
       <button id="theme-toggle">🌙</button>
     </header>
 
@@ -236,40 +234,35 @@
     const form = document.getElementById("chat-form");
     const themeToggle = document.getElementById("theme-toggle");
     const textarea = form.querySelector("textarea");
-    const botNameSpan = document.getElementById("bot-name");
+    const chatbotNameEl = document.getElementById("chatbot-name");
     let typingIndicator;
     let chatHistory = [];
-    let currentBot = { name: "Rex AI", url: "https://brandice.xyz" };
+    let currentBot = null;
 
     // 👉 Routing
     function showPage() {
-      if (location.pathname.endsWith("/chatbot")) {
+      const path = location.pathname;
+      if (path.startsWith("/chatbot/")) {
+        currentBot = path.split("/").pop();
+        const displayName = currentBot.charAt(0).toUpperCase() + currentBot.slice(1) + " AI";
+
         home.style.display = "none";
         chatSection.style.display = "flex";
-        splash.classList.remove("hidden");
+        chatbotNameEl.textContent = "💬 " + displayName;
 
-        // simulate server warm-up (2s)
-        setTimeout(() => {
-          splash.classList.add("hidden");
-        }, 2000);
+        splash.classList.remove("hidden");
+        setTimeout(() => splash.classList.add("hidden"), 2000);
       } else {
         home.style.display = "grid";
         chatSection.style.display = "none";
       }
     }
 
-    // 👉 Clicking a card sets bot details
+    // 👉 Clicking a card goes to /chatbot/[botname]
     document.querySelectorAll(".card").forEach(card => {
       card.addEventListener("click", () => {
-        currentBot = {
-          name: card.dataset.name,
-          url: card.dataset.url
-        };
-        botNameSpan.textContent = "💬 " + currentBot.name;
-        chatHistory = []; // reset history per bot
-        chatBox.innerHTML = ""; // clear chat
-
-        history.pushState({}, "", "/chatbot");
+        const bot = card.dataset.bot;
+        history.pushState({}, "", "/chatbot/" + bot);
         showPage();
       });
     });
@@ -294,7 +287,7 @@
     function showTypingIndicator() {
       typingIndicator = document.createElement("div");
       typingIndicator.className = "typing";
-      typingIndicator.textContent = currentBot.name + " is typing...";
+      typingIndicator.textContent = (currentBot || "AI") + " is typing...";
       chatBox.appendChild(typingIndicator);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -308,7 +301,7 @@
 
     async function waitUntilReady() {
       try {
-        const res = await fetch(currentBot.url + "/waiting");
+        const res = await fetch("https://brandice.xyz/waiting");
         const data = await res.json();
         return data.status === "ready";
       } catch {
@@ -318,7 +311,7 @@
 
     async function sendChat(userInput) {
       try {
-        const res = await fetch(currentBot.url + "/chat", {
+        const res = await fetch(`https://brandice.xyz/chat/${currentBot}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_input: userInput, history: chatHistory })
@@ -362,6 +355,10 @@
   </script>
 </body>
 </html>
+
+
+
+
 
 
 
