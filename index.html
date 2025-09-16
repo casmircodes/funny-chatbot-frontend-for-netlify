@@ -331,7 +331,7 @@
       }
     }
 
-    async function sendChat(userInput) {
+  /*  async function sendChat(userInput) {
   try {
     const res = await fetch("https://brandice.xyz/chat/" + currentBot, {
       method: "POST",
@@ -365,7 +365,54 @@
     appendMessage("ai", "Oops! Something went wrong. " + err.message);
     console.error("Error details:", err);
   }
+}*/
+
+
+    async function sendChat(userInput) {
+  try {
+    const historyPayload = chatHistories[currentBot] || [];
+
+    const res = await fetch("https://brandice.xyz/chat/" + currentBot, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_input: userInput,
+        history: historyPayload
+      })
+    });
+
+    const raw = await res.text();
+    console.log("Raw response:", raw);
+
+    removeTypingIndicator();
+
+    if (!res.ok) {
+      appendMessage("ai", `Server error (${res.status})`);
+      return;
+    }
+
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch (err) {
+      appendMessage("ai", "Invalid JSON from server: " + raw);
+      return;
+    }
+
+    // show AI reply
+    appendMessage("ai", data.reply, true);
+
+    // save history for this bot
+    if (Array.isArray(data.history)) {
+      chatHistories[currentBot] = data.history;
+    }
+  } catch (err) {
+    removeTypingIndicator();
+    appendMessage("ai", "Oops! Something went wrong. " + err.message);
+    console.error(err);
+  }
 }
+
 
 
     form.addEventListener("submit", async (e) => {
