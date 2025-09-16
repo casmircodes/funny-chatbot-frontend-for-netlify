@@ -5,444 +5,285 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Botiverse</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zirra AI</title>
   <style>
     :root {
-      --vh: 1vh;
+      --bg-light: #ffffff;
+      --text-light: #000000;
+      --bg-dark: #121212;
+      --text-dark: #ffffff;
     }
 
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #333;
+      background: var(--bg-light);
+      color: var(--text-light);
       height: calc(var(--vh, 1vh) * 100);
       transition: background 0.3s, color 0.3s;
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
       display: flex;
       flex-direction: column;
+      align-items: center;
     }
 
     body.dark {
-      background: #121212;
-      color: #f5f5f5;
-    }
-    body.dark header {
-      background: #222;
-      color: #fff;
-    }
-    body.dark #chat-box {
-      background: #1e1e1e;
-    }
-    body.dark .user {
-      background-color: #4a90e2;
-      color: white;
-    }
-    body.dark .ai {
-      background-color: #2c2c2c;
-      border-color: #555;
-    }
-
-    #home {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      padding: 40px;
-      text-align: center;
-    }
-    #home h1 {
-      grid-column: 1 / -1;
-      margin-bottom: 20px;
-    }
-    .card {
-      background: white;
-      padding: 10px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .card:hover {
-      transform: scale(1.05);
-    }
-    .card img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-    .card-title {
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
-    #chat-section {
-      display: none;
-      flex-direction: column;
-      height: calc(var(--vh, 1vh) * 100);
+      background: var(--bg-dark);
+      color: var(--text-dark);
     }
 
     header {
-      background: #4a90e2;
-      color: white;
       text-align: center;
-      padding: 1rem;
+      margin: 20px;
+    }
+
+    h1 {
+      margin: 0;
       font-size: 1.5rem;
-      position: relative;
-      flex-shrink: 0;
-    }
-    #theme-toggle {
-      position: absolute;
-      right: 1rem;
-      top: 1rem;
-      background: none;
-      border: 1px solid white;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 10px;
-      cursor: pointer;
     }
 
-    #chat-box {
+    .toggle-btn {
+      margin-top: 10px;
+      cursor: pointer;
+      padding: 6px 12px;
+      border: 1px solid currentColor;
+      border-radius: 6px;
+      background: transparent;
+    }
+
+    .bot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .bot-card {
+      background: inherit;
+      color: inherit;
+      border: 1px solid currentColor;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .bot-card:hover {
+      transform: scale(1.05);
+    }
+
+    .bot-card img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .chat-container {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .chat-header {
+      padding: 10px;
+      border-bottom: 1px solid currentColor;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .chat-messages {
       flex: 1;
+      padding: 10px;
       overflow-y: auto;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
     }
 
-    .message {
-      max-width: 75%;
-      padding: 0.75rem 1rem;
-      border-radius: 20px;
-      line-height: 1.4;
-      font-size: 1rem;
-      word-wrap: break-word;
-    }
-    .user {
-      align-self: flex-end;
-      background-color: #dcf8c6;
-      border-bottom-right-radius: 0;
-    }
-    .ai {
-      align-self: flex-start;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-bottom-left-radius: 0;
-    }
-    .typing {
-      align-self: flex-start;
-      font-style: italic;
-      color: #888;
-      padding: 0.5rem 1rem;
-      background-color: #eee;
-      border-radius: 15px;
+    .chat-input {
+      display: flex;
+      border-top: 1px solid currentColor;
     }
 
-    form {
-      display: flex;
-      padding: 10px;
-      background: #fff;
-      border-top: 1px solid #ccc;
-    }
-    textarea {
+    .chat-input input {
       flex: 1;
-      resize: none;
       padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #4a90e2;
-      color: #fff;
       border: none;
-      padding: 0 20px;
-      margin-left: 10px;
-      border-radius: 10px;
-      cursor: pointer;
+      outline: none;
     }
 
-    #splash {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, #4a90e2, #81d4fa);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2rem;
-      z-index: 9999;
-      flex-direction: column;
-    }
-    .spinner {
-      border: 6px solid rgba(255, 255, 255, 0.3);
-      border-top: 6px solid white;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      margin-top: 20px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .hidden {
-      display: none !important;
+    .chat-input button {
+      padding: 10px;
+      border: none;
+      background: currentColor;
+      color: inherit;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-
-  <!-- 🔹 HOME PAGE -->
-  <div id="home">
+  <header>
     <h1>Chat with AIs that feel alive.</h1>
-    <div class="card" data-bot="rex"><img src="https://via.placeholder.com/200x150"><div class="card-title">Rex</div></div>
-    <div class="card" data-bot="luna"><img src="https://via.placeholder.com/200x150"><div class="card-title">Luna</div></div>
-    <div class="card" data-bot="kai"><img src="https://via.placeholder.com/200x150"><div class="card-title">Kai</div></div>
-    <div class="card" data-bot="mira"><img src="https://via.placeholder.com/200x150"><div class="card-title">Mira</div></div>
-    <div class="card" data-bot="nova"><img src="https://via.placeholder.com/200x150"><div class="card-title">Nova</div></div>
-    <div class="card" data-bot="zen"><img src="https://via.placeholder.com/200x150"><div class="card-title">Zen</div></div>
+    <button id="toggle-theme" class="toggle-btn">Toggle Dark/Light</button>
+  </header>
+
+  <div class="bot-grid">
+    <div class="bot-card" data-bot="rex">
+      <img src="https://via.placeholder.com/150" alt="Rex" />
+      <div>Rex</div>
+    </div>
+    <div class="bot-card" data-bot="luna">
+      <img src="https://via.placeholder.com/150" alt="Luna" />
+      <div>Luna</div>
+    </div>
+    <div class="bot-card" data-bot="nova">
+      <img src="https://via.placeholder.com/150" alt="Nova" />
+      <div>Nova</div>
+    </div>
+    <div class="bot-card" data-bot="atlas">
+      <img src="https://via.placeholder.com/150" alt="Atlas" />
+      <div>Atlas</div>
+    </div>
+    <div class="bot-card" data-bot="zen">
+      <img src="https://via.placeholder.com/150" alt="Zen" />
+      <div>Zen</div>
+    </div>
+    <div class="bot-card" data-bot="echo">
+      <img src="https://via.placeholder.com/150" alt="Echo" />
+      <div>Echo</div>
+    </div>
   </div>
 
-  <!-- 🔹 CHAT PAGE -->
-  <div id="chat-section">
-    <div id="splash">
-      <div>Loading...</div>
-      <div class="spinner"></div>
+  <div class="chat-container" id="chat-container">
+    <div class="chat-header" id="chat-header"></div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input">
+      <input type="text" id="chat-input" placeholder="Type your message..." />
+      <button id="send-btn">Send</button>
     </div>
-
-    <header>
-      💬 <span id="bot-name">Rex</span>
-      <button id="theme-toggle">🌙</button>
-    </header>
-
-    <div id="chat-box"></div>
-    <form id="chat-form">
-      <textarea placeholder="Type a message..." required></textarea>
-      <button type="submit">Send</button>
-    </form>
   </div>
 
   <script>
-    const home = document.getElementById("home");
-    const chatSection = document.getElementById("chat-section");
-    const splash = document.getElementById("splash");
-    const chatBox = document.getElementById("chat-box");
-    const form = document.getElementById("chat-form");
-    const themeToggle = document.getElementById("theme-toggle");
-    const textarea = form.querySelector("textarea");
-    const botNameSpan = document.getElementById("bot-name");
+    const toggleBtn = document.getElementById("toggle-theme");
+    toggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+    });
 
-    let typingIndicator;
-    let currentBot = "rex"; // default
+    const botCards = document.querySelectorAll(".bot-card");
+    const chatContainer = document.getElementById("chat-container");
+    const chatHeader = document.getElementById("chat-header");
+    const chatMessages = document.getElementById("chat-messages");
+    const chatInput = document.getElementById("chat-input");
+    const sendBtn = document.getElementById("send-btn");
 
-    // 🔹 Store chat histories for each bot
-    const chatHistories = {
+    let currentBot = null;
+
+    // store history for each bot
+    let chatHistories = {
       rex: [],
       luna: [],
-      kai: [],
-      mira: [],
       nova: [],
-      zen: []
+      atlas: [],
+      zen: [],
+      echo: []
     };
 
-    function renderChat(bot) {
-      chatBox.innerHTML = "";
-      chatHistories[bot].forEach(msg => {
-        const div = document.createElement("div");
-        div.className = "message " + msg.sender;
-        div.innerHTML = msg.isMarkdown ? marked.parse(msg.text) : msg.text;
-        chatBox.appendChild(div);
-      });
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function saveMessage(bot, sender, text, isMarkdown = false) {
-      chatHistories[bot].push({ sender, text, isMarkdown });
-    }
-
-    function showPage() {
-      if (location.pathname.startsWith("/chatbot")) {
-        home.style.display = "none";
-        chatSection.style.display = "flex";
-        splash.classList.remove("hidden");
-
-        setTimeout(() => splash.classList.add("hidden"), 2000);
-
-        renderChat(currentBot);
-      } else {
-        home.style.display = "grid";
-        chatSection.style.display = "none";
-      }
-    }
-
-    document.querySelectorAll(".card").forEach(card => {
+    botCards.forEach(card => {
       card.addEventListener("click", () => {
         currentBot = card.dataset.bot;
-        botNameSpan.textContent = card.querySelector(".card-title").textContent;
-        history.pushState({}, "", "/chatbot/" + currentBot);
-        showPage();
+        chatHeader.textContent = "Chatting with " + currentBot;
+        document.querySelector(".bot-grid").style.display = "none";
+        chatContainer.style.display = "flex";
+        renderChat(currentBot);
       });
     });
 
-    window.addEventListener("popstate", showPage);
-    showPage();
-
-    themeToggle.addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-      themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+    sendBtn.addEventListener("click", () => {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+      appendMessage("user", msg);
+      chatInput.value = "";
+      sendChat(msg);
     });
 
-    function appendMessage(role, text, isMarkdown = false) {
-      const div = document.createElement("div");
-      div.className = "message " + role;
-      div.innerHTML = isMarkdown ? marked.parse(text) : text;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-      saveMessage(currentBot, role, text, isMarkdown);
+    function appendMessage(sender, text, isMarkdown = false) {
+      const msgDiv = document.createElement("div");
+      msgDiv.textContent = (sender === "user" ? "You: " : "AI: ") + text;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      saveMessage(currentBot, { sender, text, isMarkdown });
     }
 
-    function showTypingIndicator() {
-      typingIndicator = document.createElement("div");
-      typingIndicator.className = "typing";
-      typingIndicator.textContent = botNameSpan.textContent + " is typing...";
-      chatBox.appendChild(typingIndicator);
-      chatBox.scrollTop = chatBox.scrollHeight;
+    function saveMessage(bot, msg) {
+      chatHistories[bot].push(msg);
     }
+
+    function renderChat(bot) {
+      chatMessages.innerHTML = "";
+      chatHistories[bot].forEach(m =>
+        appendMessage(m.sender, m.text, m.isMarkdown)
+      );
+    }
+
     function removeTypingIndicator() {
-      if (typingIndicator) {
-        chatBox.removeChild(typingIndicator);
-        typingIndicator = null;
-      }
+      const el = document.getElementById("typing-indicator");
+      if (el) el.remove();
     }
-
-    async function waitUntilReady() {
-      try {
-        const res = await fetch("https://brandice.xyz/waiting");
-        const data = await res.json();
-        return data.status === "ready";
-      } catch {
-        return false;
-      }
-    }
-
-  /*  async function sendChat(userInput) {
-  try {
-    const res = await fetch("https://brandice.xyz/chat/" + currentBot, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_input: userInput, history: chatHistory })
-    });
-
-    console.log("Status:", res.status);
-    const text = await res.text();
-    console.log("Raw response:", text);
-
-    removeTypingIndicator();
-
-    if (res.status === 429) {
-      appendMessage("ai", "Server is busy. Please try again later.");
-      return;
-    }
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      appendMessage("ai", "Invalid JSON from server: " + text);
-      return;
-    }
-
-    appendMessage("ai", data.reply, true);
-    chatHistory = data.history;
-  } catch (err) {
-    removeTypingIndicator();
-    appendMessage("ai", "Oops! Something went wrong. " + err.message);
-    console.error("Error details:", err);
-  }
-}*/
-
 
     async function sendChat(userInput) {
-  try {
-    const historyPayload = chatHistories[currentBot] || [];
+      try {
+        const historyPayload = chatHistories[currentBot] || [];
 
-    const res = await fetch("https://brandice.xyz/chat/" + currentBot, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_input: userInput,
-        history: historyPayload
-      })
-    });
+        const res = await fetch("https://brandice.xyz/chat/" + currentBot, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_input: userInput,
+            history: historyPayload
+          })
+        });
 
-    const raw = await res.text();
-    console.log("Raw response:", raw);
+        console.log("Status:", res.status);
+        const raw = await res.text();
+        console.log("Raw response:", raw);
 
-    removeTypingIndicator();
-
-    if (!res.ok) {
-      appendMessage("ai", `Server error (${res.status})`);
-      return;
-    }
-
-    let data;
-    try {
-      data = JSON.parse(raw);
-    } catch (err) {
-      appendMessage("ai", "Invalid JSON from server: " + raw);
-      return;
-    }
-
-    // show AI reply
-    appendMessage("ai", data.reply, true);
-
-    // save history for this bot
-    if (Array.isArray(data.history)) {
-      chatHistories[currentBot] = data.history;
-    }
-  } catch (err) {
-    removeTypingIndicator();
-    appendMessage("ai", "Oops! Something went wrong. " + err.message);
-    console.error(err);
-  }
-}
-
-
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const userInput = textarea.value.trim();
-      if (!userInput) return;
-
-      appendMessage("user", userInput);
-      textarea.value = "";
-
-      setTimeout(showTypingIndicator, 500);
-
-      const ready = await waitUntilReady();
-      if (ready) await sendChat(userInput);
-      else {
         removeTypingIndicator();
-        appendMessage("ai", "Server is busy. Please try again later.");
-      }
-    });
 
-    function setViewportHeight() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
+        if (!res.ok) {
+          appendMessage("ai", `Server error (${res.status})`);
+          return;
+        }
+
+        let data;
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          appendMessage("ai", "Invalid JSON from server: " + raw);
+          return;
+        }
+
+        if (data.reply) {
+          appendMessage("ai", data.reply, true);
+        }
+
+        if (Array.isArray(data.history)) {
+          chatHistories[currentBot] = data.history;
+          renderChat(currentBot);
+        }
+      } catch (err) {
+        removeTypingIndicator();
+        appendMessage("ai", "Oops! Something went wrong. " + err.message);
+        console.error("Error details:", err);
+      }
     }
-    setViewportHeight();
-    window.addEventListener('resize', setViewportHeight);
   </script>
 </body>
 </html>
-
 
 
 
