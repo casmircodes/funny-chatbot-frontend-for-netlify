@@ -1,142 +1,147 @@
 
 
 
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Botiverse</title>
-
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
   <style>
-    :root {
+    :root{
       --vh: 1vh;
       --bg: #f5f5f5;
-      --text: #000;
+      --text: #333333;
+      --card-bg: #ffffff;
+      --card-text: #333333;
+      --header-bg: #4a90e2;
+      --header-text: #ffffff;
       --user-bg: #dcf8c6;
       --bot-bg: #ffffff;
       --input-bg: #ffffff;
-      --header-bg: #4a90e2;
-      --header-text: #ffffff;
-      --border: #ccc;
+      --border: #cccccc;
+      --accent: #4a90e2;
+      --muted: #888888;
     }
 
-    body.dark {
-      --bg: #121212;
-      --text: #eee;
-      --user-bg: #004d40;
+    body.dark{
+      --bg: #0f1720;
+      --text: #e6eef8;
+      --card-bg: #0b1220;
+      --card-text: #e6eef8;
+      --header-bg: #0b1220;
+      --header-text: #e6eef8;
+      --user-bg: #054d3a;
       --bot-bg: #1e1e1e;
-      --input-bg: #1c1c1c;
-      --header-bg: #263238;
-      --header-text: #ffffff;
-      --border: #444;
+      --input-bg: #071025;
+      --border: #263142;
+      --accent: #2b86d9;
+      --muted: #9aa6b2;
     }
 
-    html, body {
+    html,body{
+      height: calc(var(--vh, 1vh) * 100);
       margin: 0;
       padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: var(--bg);
       color: var(--text);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      transition: background 0.3s, color 0.3s;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      transition: background .25s ease, color .25s ease;
     }
 
-    * { box-sizing: border-box; }
-
-    /* ---------- HOME PAGE ---------- */
-    #home-page {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 2rem 1rem;
-      overflow-y: auto;
+    /* Global theme toggle (always visible top-right) */
+    #theme-toggle {
+      position: fixed;
+      right: 12px;
+      top: 12px;
+      z-index: 10010;
+      background: var(--header-bg);
+      color: var(--header-text);
+      border: none;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      font-size: 16px;
     }
 
-    #home-page h1 {
-      font-size: 2rem;
-      margin-bottom: 2rem;
+    /* Home page */
+    #home-container{
+      padding: 30px;
       text-align: center;
+      min-height: calc(var(--vh, 1vh) * 100 - 40px);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
     }
 
-    .cards {
+    #home-container h1{
+      font-size: 2rem;
+      margin: 0 0 24px 0;
+      color: var(--text);
+    }
+
+    #home{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-      width: 100%;
-      max-width: 1000px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+      flex: 1;
+      align-content: start;
     }
 
     .card {
-      background: var(--bot-bg);
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      overflow: hidden;
+      background: var(--card-bg);
+      color: var(--card-text);
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
       text-align: center;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      border: 1px solid rgba(0,0,0,0.03);
     }
 
     .card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-6px);
+      box-shadow: 0 18px 36px rgba(0,0,0,0.12);
     }
 
     .card img {
       width: 100%;
-      height: 150px;
+      height: 140px;
       object-fit: cover;
+      border-radius: 8px;
+      display: block;
     }
 
-    .card h3 {
-      margin: 1rem;
-      font-size: 1.2rem;
+    .card-title {
+      margin-top: 10px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--card-text);
     }
 
-    /* ---------- CHATBOT PAGE ---------- */
-    #chatbot-page {
-      display: flex;
+    /* Chat UI */
+    #chat-section {
+      display: none;
       flex-direction: column;
       height: 100%;
-      width: 100%;
+      box-sizing: border-box;
     }
 
     header {
-      background-color: var(--header-bg);
+      background: var(--header-bg);
       color: var(--header-text);
       text-align: center;
       padding: 1rem;
-      font-size: 1.5rem;
-      flex-shrink: 0;
+      font-size: 1.25rem;
       position: relative;
-    }
-
-    #theme-toggle {
-      position: absolute;
-      right: 1rem;
-      top: 1rem;
-      background: none;
-      border: 1px solid var(--header-text);
-      color: var(--header-text);
-      padding: 5px 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.9rem;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
     }
 
     #chat-box {
@@ -146,7 +151,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-width: 100%;
+      background: transparent;
     }
 
     .message {
@@ -156,153 +161,256 @@
       line-height: 1.4;
       font-size: 1rem;
       word-wrap: break-word;
-      word-break: break-word;
+      color: var(--text);
     }
 
     .user {
       align-self: flex-end;
       background-color: var(--user-bg);
       border-bottom-right-radius: 0;
+      color: var(--card-text);
     }
 
     .ai {
       align-self: flex-start;
       background-color: var(--bot-bg);
-      border-bottom-left-radius: 0;
       border: 1px solid var(--border);
+      border-bottom-left-radius: 0;
+      color: var(--text);
     }
 
     .typing {
       align-self: flex-start;
       font-style: italic;
-      color: #888;
+      color: var(--muted);
       padding: 0.5rem 1rem;
-      background-color: #eee;
+      background-color: var(--input-bg);
       border-radius: 15px;
     }
 
     form {
       display: flex;
-      padding: 0.75rem;
-      background-color: var(--input-bg);
+      padding: 10px;
+      background: var(--input-bg);
       border-top: 1px solid var(--border);
-      width: 100%;
-      flex-shrink: 0;
+      gap: 8px;
     }
 
     textarea {
       flex: 1;
       resize: none;
-      padding: 0.75rem;
+      padding: 10px;
+      border-radius: 10px;
       border: 1px solid var(--border);
-      border-radius: 15px;
-      font-size: 1rem;
-      margin-right: 0.5rem;
-      height: 3rem;
-      background-color: var(--input-bg);
+      background: var(--input-bg);
       color: var(--text);
+      min-height: 44px;
     }
 
-    button {
-      background-color: #4a90e2;
+    button.send-btn {
+      background: var(--accent);
       color: white;
       border: none;
-      border-radius: 15px;
-      padding: 0 1rem;
+      padding: 0 18px;
+      border-radius: 10px;
       cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.3s ease;
     }
 
-    button:hover { background-color: #357ab8; }
+    /* Splash */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--header-bg), #81d4fa);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.75rem;
+      z-index: 9999;
+      flex-direction: column;
+      transition: opacity .3s ease, visibility .3s ease;
+    }
+
+    .spinner {
+      border: 6px solid rgba(255, 255, 255, 0.3);
+      border-top: 6px solid white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      margin-top: 18px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
     .hidden { display: none !important; }
+
+    @media (max-width: 600px) {
+      #home-container { padding: 18px; }
+      .card img { height: 110px; }
+      header { font-size: 1.1rem; }
+    }
   </style>
 </head>
 <body>
+  <!-- Global theme toggle (always visible) -->
+  <button id="theme-toggle" aria-label="Toggle theme">🌙</button>
+
   <!-- HOME PAGE -->
-  <div id="home-page">
+  <div id="home-container">
     <h1>Chat with AIs that feel alive.</h1>
-    <div class="cards">
-      <div class="card" data-chatbot="rex"><img src="https://via.placeholder.com/300x150" alt=""><h3>Rex AI</h3></div>
-      <div class="card" data-chatbot="luna"><img src="https://via.placeholder.com/300x150" alt=""><h3>Luna AI</h3></div>
-      <div class="card" data-chatbot="zara"><img src="https://via.placeholder.com/300x150" alt=""><h3>Zara AI</h3></div>
-      <div class="card" data-chatbot="nova"><img src="https://via.placeholder.com/300x150" alt=""><h3>Nova AI</h3></div>
-      <div class="card" data-chatbot="kai"><img src="https://via.placeholder.com/300x150" alt=""><h3>Kai AI</h3></div>
-      <div class="card" data-chatbot="milo"><img src="https://via.placeholder.com/300x150" alt=""><h3>Milo AI</h3></div>
+    <div id="home">
+      <div class="card" data-bot="rex">
+        <img src="https://via.placeholder.com/400x220?text=Rex" alt="Rex AI">
+        <div class="card-title">Rex AI</div>
+      </div>
+      <div class="card" data-bot="nova">
+        <img src="https://via.placeholder.com/400x220?text=Nova" alt="Nova AI">
+        <div class="card-title">Nova AI</div>
+      </div>
+      <div class="card" data-bot="luna">
+        <img src="https://via.placeholder.com/400x220?text=Luna" alt="Luna AI">
+        <div class="card-title">Luna AI</div>
+      </div>
+      <div class="card" data-bot="atlas">
+        <img src="https://via.placeholder.com/400x220?text=Atlas" alt="Atlas AI">
+        <div class="card-title">Atlas AI</div>
+      </div>
+      <div class="card" data-bot="zen">
+        <img src="https://via.placeholder.com/400x220?text=Zen" alt="Zen AI">
+        <div class="card-title">Zen AI</div>
+      </div>
+      <div class="card" data-bot="echo">
+        <img src="https://via.placeholder.com/400x220?text=Echo" alt="Echo AI">
+        <div class="card-title">Echo AI</div>
+      </div>
     </div>
   </div>
 
-  <!-- CHATBOT PAGE -->
-  <div id="chatbot-page" class="hidden">
+  <!-- CHAT PAGE -->
+  <div id="chat-section">
+    <div id="splash" class="hidden">
+      <div>Loading chatbot...</div>
+      <div class="spinner"></div>
+    </div>
+
     <header>
-      <span id="chatbot-title">💬 Rex AI</span>
-      <button id="theme-toggle">🌙</button>
+      <span id="chat-title">💬 Rex AI</span>
     </header>
 
     <div id="chat-box"></div>
 
     <form id="chat-form">
-      <textarea name="user_input" placeholder="Type a message..." required></textarea>
-      <button type="submit">Send</button>
+      <textarea placeholder="Type a message..." required></textarea>
+      <button type="submit" class="send-btn">Send</button>
     </form>
   </div>
 
   <script>
-    const homePage = document.getElementById("home-page");
-    const chatbotPage = document.getElementById("chatbot-page");
-    const chatTitle = document.getElementById("chatbot-title");
-    const themeToggle = document.getElementById("theme-toggle");
-    const chatBox = document.getElementById("chat-box");
-    const form = document.getElementById("chat-form");
-    const textarea = form.querySelector("textarea");
-    let typingIndicator;
-    let chatHistory = [];
-    let currentBot = "rex";
+    // viewport height fix for mobile browsers
+    function setVh() {
+      document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+    }
+    setVh();
+    window.addEventListener('resize', setVh);
 
-    // Handle theme toggle
-    themeToggle.addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-      themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+    // DOM
+    const themeToggle = document.getElementById('theme-toggle');
+    const homeContainer = document.getElementById('home-container');
+    const chatSection = document.getElementById('chat-section');
+    const splash = document.getElementById('splash');
+    const chatBox = document.getElementById('chat-box');
+    const form = document.getElementById('chat-form');
+    const textarea = form.querySelector('textarea');
+    const chatTitle = document.getElementById('chat-title');
+
+    // Chat state
+    let typingIndicator = null;
+    let chatHistory = [];
+    let currentBot = 'rex';
+
+    const botConfigs = {
+      rex:   { name: "Rex AI",   endpoint: "https://brandice.xyz/chat/rex" },
+      nova:  { name: "Nova AI",  endpoint: "https://brandice.xyz/chat/nova" },
+      luna:  { name: "Luna AI",  endpoint: "https://brandice.xyz/chat/luna" },
+      atlas: { name: "Atlas AI", endpoint: "https://brandice.xyz/chat/atlas" },
+      zen:   { name: "Zen AI",   endpoint: "https://brandice.xyz/chat/zen" },
+      echo:  { name: "Echo AI",  endpoint: "https://brandice.xyz/chat/echo" }
+    };
+
+    /* -------------------------
+       Theme toggle (persist)
+       -------------------------*/
+    function applySavedTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') document.body.classList.add('dark');
+      themeToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    }
+    applySavedTheme();
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark');
+      themeToggle.textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
 
-    // Navigate to chatbot page when card is clicked
-    document.querySelectorAll(".card").forEach(card => {
-      card.addEventListener("click", () => {
-        currentBot = card.dataset.chatbot;
-        chatTitle.textContent = "💬 " + card.querySelector("h3").textContent;
-        history.pushState({}, "", "/chatbot/" + currentBot);
+    /* -------------------------
+       Routing & card click
+       -------------------------*/
+    function showPage() {
+      const path = location.pathname;
+      if (path.startsWith('/chatbot/')) {
+        const bot = path.split('/').pop() || 'rex';
+        if (botConfigs[bot]) currentBot = bot;
+        setupChatFor(currentBot);
+        homeContainer.style.display = 'none';
+        chatSection.style.display = 'flex';
+        splash.classList.remove('hidden');
+        setTimeout(() => splash.classList.add('hidden'), 1100);
+      } else {
+        homeContainer.style.display = 'flex';
+        chatSection.style.display = 'none';
+      }
+    }
 
-        homePage.classList.add("hidden");
-        chatbotPage.classList.remove("hidden");
-        chatBox.innerHTML = "";
-        chatHistory = [];
+    function setupChatFor(botKey) {
+      const cfg = botConfigs[botKey] || botConfigs.rex;
+      chatTitle.textContent = "💬 " + cfg.name;
+      chatHistory = [];
+      chatBox.innerHTML = '';
+    }
+
+    // card click -> navigate
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        const bot = card.dataset.bot || 'rex';
+        history.pushState({}, '', '/chatbot/' + bot);
+        showPage();
       });
     });
 
-    // Back/forward browser navigation
-    window.addEventListener("popstate", () => {
-      if (location.pathname.startsWith("/chatbot/")) {
-        homePage.classList.add("hidden");
-        chatbotPage.classList.remove("hidden");
-      } else {
-        homePage.classList.remove("hidden");
-        chatbotPage.classList.add("hidden");
-      }
-    });
+    window.addEventListener('popstate', showPage);
+    showPage();
 
+    /* -------------------------
+       Chat helpers
+       -------------------------*/
     function appendMessage(role, text, isMarkdown = false) {
-      const div = document.createElement("div");
-      div.className = "message " + role;
+      const div = document.createElement('div');
+      div.className = 'message ' + role;
       div.innerHTML = isMarkdown ? marked.parse(text) : text;
       chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     function showTypingIndicator() {
-      typingIndicator = document.createElement("div");
-      typingIndicator.className = "typing";
-      typingIndicator.textContent = chatTitle.textContent + " is typing...";
+      if (typingIndicator) return;
+      typingIndicator = document.createElement('div');
+      typingIndicator.className = 'typing';
+      typingIndicator.textContent = (botConfigs[currentBot]?.name || 'AI') + ' is typing...';
       chatBox.appendChild(typingIndicator);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -314,54 +422,56 @@
       }
     }
 
-    async function sendChat(userInput) {
+    async function waitUntilReady(){
       try {
-        const res = await fetch(`https://brandice.xyz/${currentBot}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_input: userInput, history: chatHistory })
-        });
-
+        const res = await fetch('https://brandice.xyz/waiting');
         const data = await res.json();
-        removeTypingIndicator();
-
-        if (res.status === 429) {
-          appendMessage("ai", "Server is busy. Please try again later.");
-          return;
-        }
-
-        appendMessage("ai", data.reply, true);
-        chatHistory = data.history;
-      } catch (err) {
-        removeTypingIndicator();
-        appendMessage("ai", "Oops! Something went wrong.");
+        return data.status === 'ready';
+      } catch {
+        return false;
       }
     }
 
-    form.addEventListener("submit", async (e) => {
+    async function sendChat(userInput){
+      const cfg = botConfigs[currentBot] || botConfigs.rex;
+      try {
+        const res = await fetch(cfg.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_input: userInput, history: chatHistory })
+        });
+        const data = await res.json();
+        removeTypingIndicator();
+        if (res.status === 429) {
+          appendMessage('ai', 'Server is busy. Please try again later.');
+          return;
+        }
+        appendMessage('ai', data.reply, true);
+        chatHistory = data.history;
+      } catch (err) {
+        removeTypingIndicator();
+        appendMessage('ai', 'Oops! Something went wrong.');
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const userInput = textarea.value.trim();
       if (!userInput) return;
 
-      appendMessage("user", userInput);
-      textarea.value = "";
-
-      setTimeout(showTypingIndicator, 500);
-      await sendChat(userInput);
+      appendMessage('user', userInput);
+      textarea.value = '';
+      setTimeout(() => showTypingIndicator(), 300);
+      const ready = await waitUntilReady();
+      if (ready) await sendChat(userInput);
+      else {
+        removeTypingIndicator();
+        appendMessage('ai', 'Server is busy. Please try again later.');
+      }
     });
-
-    // Initial route setup
-    if (location.pathname.startsWith("/chatbot/")) {
-      homePage.classList.add("hidden");
-      chatbotPage.classList.remove("hidden");
-    } else {
-      homePage.classList.remove("hidden");
-      chatbotPage.classList.add("hidden");
-    }
   </script>
 </body>
 </html>
-
 
 
 
