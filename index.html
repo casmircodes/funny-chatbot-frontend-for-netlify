@@ -26,7 +26,6 @@
       flex-direction: column;
     }
 
-    /* 🔹 Dark mode */
     body.dark {
       background: #121212;
       color: #f5f5f5;
@@ -47,7 +46,6 @@
       border-color: #555;
     }
 
-    /* 🔹 Home Page Styles */
     #home {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -55,12 +53,10 @@
       padding: 40px;
       text-align: center;
     }
-
     #home h1 {
       grid-column: 1 / -1;
       margin-bottom: 20px;
     }
-
     .card {
       background: white;
       padding: 10px;
@@ -83,7 +79,6 @@
       font-weight: bold;
     }
 
-    /* 🔹 Chat UI Styles */
     #chat-section {
       display: none;
       flex-direction: column;
@@ -171,7 +166,6 @@
       cursor: pointer;
     }
 
-    /* 🔹 Splash screen */
     #splash {
       position: fixed;
       inset: 0;
@@ -207,36 +201,18 @@
   <!-- 🔹 HOME PAGE -->
   <div id="home">
     <h1>Chat with AIs that feel alive.</h1>
-    <div class="card" data-bot="rex">
-      <img src="https://via.placeholder.com/200x150" alt="Card 1">
-      <div class="card-title">Rex</div>
-    </div>
-    <div class="card" data-bot="luna">
-      <img src="https://via.placeholder.com/200x150" alt="Card 2">
-      <div class="card-title">Luna</div>
-    </div>
-    <div class="card" data-bot="kai">
-      <img src="https://via.placeholder.com/200x150" alt="Card 3">
-      <div class="card-title">Kai</div>
-    </div>
-    <div class="card" data-bot="mira">
-      <img src="https://via.placeholder.com/200x150" alt="Card 4">
-      <div class="card-title">Mira</div>
-    </div>
-    <div class="card" data-bot="nova">
-      <img src="https://via.placeholder.com/200x150" alt="Card 5">
-      <div class="card-title">Nova</div>
-    </div>
-    <div class="card" data-bot="zen">
-      <img src="https://via.placeholder.com/200x150" alt="Card 6">
-      <div class="card-title">Zen</div>
-    </div>
+    <div class="card" data-bot="rex"><img src="https://via.placeholder.com/200x150"><div class="card-title">Rex</div></div>
+    <div class="card" data-bot="luna"><img src="https://via.placeholder.com/200x150"><div class="card-title">Luna</div></div>
+    <div class="card" data-bot="kai"><img src="https://via.placeholder.com/200x150"><div class="card-title">Kai</div></div>
+    <div class="card" data-bot="mira"><img src="https://via.placeholder.com/200x150"><div class="card-title">Mira</div></div>
+    <div class="card" data-bot="nova"><img src="https://via.placeholder.com/200x150"><div class="card-title">Nova</div></div>
+    <div class="card" data-bot="zen"><img src="https://via.placeholder.com/200x150"><div class="card-title">Zen</div></div>
   </div>
 
   <!-- 🔹 CHAT PAGE -->
   <div id="chat-section">
     <div id="splash">
-      <div>Rex AI is warming up...</div>
+      <div>Loading...</div>
       <div class="spinner"></div>
     </div>
 
@@ -263,10 +239,33 @@
     const botNameSpan = document.getElementById("bot-name");
 
     let typingIndicator;
-    let chatHistory = [];
     let currentBot = "rex"; // default
 
-    // 👉 Routing
+    // 🔹 Store chat histories for each bot
+    const chatHistories = {
+      rex: [],
+      luna: [],
+      kai: [],
+      mira: [],
+      nova: [],
+      zen: []
+    };
+
+    function renderChat(bot) {
+      chatBox.innerHTML = "";
+      chatHistories[bot].forEach(msg => {
+        const div = document.createElement("div");
+        div.className = "message " + msg.sender;
+        div.innerHTML = msg.isMarkdown ? marked.parse(msg.text) : msg.text;
+        chatBox.appendChild(div);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function saveMessage(bot, sender, text, isMarkdown = false) {
+      chatHistories[bot].push({ sender, text, isMarkdown });
+    }
+
     function showPage() {
       if (location.pathname.startsWith("/chatbot")) {
         home.style.display = "none";
@@ -274,6 +273,8 @@
         splash.classList.remove("hidden");
 
         setTimeout(() => splash.classList.add("hidden"), 2000);
+
+        renderChat(currentBot);
       } else {
         home.style.display = "grid";
         chatSection.style.display = "none";
@@ -292,7 +293,6 @@
     window.addEventListener("popstate", showPage);
     showPage();
 
-    // 👉 Chat logic
     themeToggle.addEventListener("click", () => {
       document.body.classList.toggle("dark");
       themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
@@ -304,7 +304,9 @@
       div.innerHTML = isMarkdown ? marked.parse(text) : text;
       chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
+      saveMessage(currentBot, role, text, isMarkdown);
     }
+
     function showTypingIndicator() {
       typingIndicator = document.createElement("div");
       typingIndicator.className = "typing";
@@ -334,7 +336,7 @@
         const res = await fetch("https://brandice.xyz/chat/" + currentBot, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_input: userInput, history: chatHistory })
+          body: JSON.stringify({ user_input: userInput, history: chatHistories[currentBot] })
         });
 
         const data = await res.json();
@@ -346,7 +348,7 @@
         }
 
         appendMessage("ai", data.reply, true);
-        chatHistory = data.history;
+        chatHistories[currentBot] = data.history; // update specific bot's history
       } catch (err) {
         removeTypingIndicator();
         appendMessage("ai", "Oops! Something went wrong.");
@@ -371,7 +373,6 @@
       }
     });
 
-    // 👉 Fix viewport height on mobile
     function setViewportHeight() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
