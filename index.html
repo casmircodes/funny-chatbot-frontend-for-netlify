@@ -332,28 +332,41 @@
     }
 
     async function sendChat(userInput) {
-      try {
-        const res = await fetch("https://brandice.xyz/chat/" + currentBot, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_input: userInput, history: chatHistories[currentBot] })
-        });
+  try {
+    const res = await fetch("https://brandice.xyz/chat/" + currentBot, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_input: userInput, history: chatHistory })
+    });
 
-        const data = await res.json();
-        removeTypingIndicator();
+    console.log("Status:", res.status);
+    const text = await res.text();
+    console.log("Raw response:", text);
 
-        if (res.status === 429) {
-          appendMessage("ai", "Server is busy. Please try again later.");
-          return;
-        }
+    removeTypingIndicator();
 
-        appendMessage("ai", data.reply, true);
-        chatHistories[currentBot] = data.history; // update specific bot's history
-      } catch (err) {
-        removeTypingIndicator();
-        appendMessage("ai", "Oops! Something went wrong.");
-      }
+    if (res.status === 429) {
+      appendMessage("ai", "Server is busy. Please try again later.");
+      return;
     }
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      appendMessage("ai", "Invalid JSON from server: " + text);
+      return;
+    }
+
+    appendMessage("ai", data.reply, true);
+    chatHistory = data.history;
+  } catch (err) {
+    removeTypingIndicator();
+    appendMessage("ai", "Oops! Something went wrong. " + err.message);
+    console.error("Error details:", err);
+  }
+}
+
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
